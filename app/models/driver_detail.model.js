@@ -1,0 +1,82 @@
+const db = require('../../config/mysql.db');
+
+const STATUS_ACTIVE = 'ACTIVE';
+const STATUS_INACTIVE = 'INACTIVE';
+const STATUS_DELETED = 'DELETED';
+
+const DRIVER_STATUS_AVAILABLE = 'AVAILABLE';
+const DRIVER_STATUS_UNAVAILABLE = 'UNAVAILABLE';
+
+
+exports.create = async (data) => {
+    const attributes = {
+        employee_number: data.employee_number,
+        name: data.name,
+        contact_number: data.contact_number,
+        driver_status: DRIVER_STATUS_AVAILABLE,
+        status: STATUS_ACTIVE,
+        date_created: new Date(),
+        date_updated: new Date()
+    };
+
+    const queryResult = await db.query('INSERT INTO driver_details SET ?', attributes);
+
+    const result = queryResult[0] || queryResult;
+
+    const affected = result.affectedRows;
+    if (affected === 1) return { id: result.insertId, ...attributes };
+
+    throw new Error('Error on creating profit-center record!');
+}
+
+exports.find = async (id) => {
+    const queryResult = await db.query(`SELECT * FROM driver_details WHERE id = ${id} AND status = '${STATUS_ACTIVE}'`);
+
+    return queryResult[0] ? queryResult[0] : null;
+};
+
+exports.findAll = async (id) => {
+    const queryResults = await db.query(`SELECT * FROM driver_details WHERE status = '${STATUS_ACTIVE}'`);
+
+    return queryResults ? queryResults : [];
+};
+
+exports.update = async (id, data) => {
+    const attributes = {
+        employee_number: data.employee_number,
+        name: data.name,
+        contact_number: data.contact_number,
+        driver_status: data.driver_status,
+        date_updated: new Date()
+    };
+
+    const update = await db.query(`UPDATE driver_details SET ? WHERE id = ${id}`, { ...attributes });
+
+    if (update) {
+        const queryResult = await db.query(`SELECT * FROM driver_details WHERE id = ${id} AND status = '${STATUS_ACTIVE}'`);
+        return queryResult[0] ? queryResult[0] : null;
+    }
+
+    throw new Error('Error on creating profit-center record!');
+}
+
+exports.delete = async (id) => {
+    const attributes = { status: STATUS_INACTIVE };
+
+    const update = await db.query(`UPDATE driver_details SET ? WHERE id = ${id}`, { ...attributes });
+
+    if (update) {
+        const queryResult = await db.query(`SELECT * FROM driver_details WHERE id = ${id} AND status = '${STATUS_INACTIVE}'`);
+        return queryResult[0] ? queryResult[0] : null;
+    }
+
+    throw new Error('Error on creating driver details record!');
+}
+
+
+exports.STATUS_ACTIVE = STATUS_ACTIVE;
+exports.STATUS_INACTIVE = STATUS_INACTIVE;
+exports.STATUS_DELETED = STATUS_DELETED;
+
+exports.DRIVER_STATUS_AVAILABLE = DRIVER_STATUS_AVAILABLE;
+exports.DRIVER_STATUS_UNAVAILABLE = DRIVER_STATUS_UNAVAILABLE
