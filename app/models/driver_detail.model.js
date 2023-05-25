@@ -16,7 +16,9 @@ exports.create = async (data) => {
         driver_status: DRIVER_STATUS_AVAILABLE,
         status: STATUS_ACTIVE,
         date_created: new Date(),
-        date_updated: new Date()
+        date_updated: new Date(),
+        created_by: data.created_by,
+        updated_by: data.updated_by
     };
 
     const queryResult = await db.query('INSERT INTO driver_details SET ?', attributes);
@@ -47,7 +49,9 @@ exports.update = async (id, data) => {
         name: data.name,
         contact_number: data.contact_number,
         driver_status: data.driver_status,
-        date_updated: new Date()
+        date_updated: new Date(),
+        created_by: data.created_by,
+        updated_by: data.updated_by
     };
 
     const update = await db.query(`UPDATE driver_details SET ? WHERE id = ${id}`, { ...attributes });
