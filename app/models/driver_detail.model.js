@@ -28,7 +28,7 @@ exports.create = async (data) => {
     const affected = result.affectedRows;
     if (affected === 1) return { id: result.insertId, ...attributes };
 
-    throw new Error('Error on creating profit-center record!');
+    throw new Error('Error on creating driver record!');
 }
 
 exports.find = async (id) => {
@@ -50,7 +50,6 @@ exports.update = async (id, data) => {
         contact_number: data.contact_number,
         driver_status: data.driver_status,
         date_updated: new Date(),
-        created_by: data.created_by,
         updated_by: data.updated_by
     };
 
@@ -61,7 +60,24 @@ exports.update = async (id, data) => {
         return queryResult[0] ? queryResult[0] : null;
     }
 
-    throw new Error('Error on creating profit-center record!');
+    throw new Error('Error on updating driver record!');
+}
+
+exports.updateStatus = async (id, data) => {
+    const attributes = {
+        driver_status: data.driver_status,
+        date_updated: new Date(),
+        updated_by: data.updated_by
+    };
+
+    const update = await db.query(`UPDATE driver_details SET ? WHERE id = ${id}`, { ...attributes });
+
+    if (update) {
+        const queryResult = await db.query(`SELECT * FROM driver_details WHERE id = ${id} AND status = '${STATUS_ACTIVE}'`);
+        return queryResult[0] ? queryResult[0] : null;
+    }
+
+    throw new Error('Error on updating driver status record!');
 }
 
 exports.delete = async (id) => {
@@ -74,7 +90,7 @@ exports.delete = async (id) => {
         return queryResult[0] ? queryResult[0] : null;
     }
 
-    throw new Error('Error on creating driver details record!');
+    throw new Error('Error on deleting driver record!');
 }
 
 
