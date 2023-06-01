@@ -11,7 +11,7 @@ const defaultSchema = Joi.object({
     password: Joi.string().trim().required().max(LIMIT_DEFAULT_CHAR),
     role: Joi.string().trim()
         .valid(defaultModel.USER_ROLE_ADMIN, defaultModel.USER_ROLE_USER, defaultModel.USER_ROLE_HEAD),
-    department: Joi.array().items(Joi.number().required()).required(),
+    department: Joi.number().required(),
 
     created_by: Joi.string().trim().max(LIMIT_DEFAULT_CHAR).required(),
     updated_by: Joi.string().trim().max(LIMIT_DEFAULT_CHAR).required()

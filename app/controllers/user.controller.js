@@ -35,7 +35,6 @@ exports.authenticate = async (req, res) => {
 
         }
 
-        console.log(validatedUser)
         const jwtPayload = {
             _id: validatedUser._id,
             username: validatedUser.username,
@@ -88,6 +87,19 @@ exports.create = async (req, res) => {
 
         }
 
+        const auth = req.auth;
+        const userAuth = await defaultModel.find(auth._id);
+        if (!userAuth) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+
+        body.created_by = userAuth.username;
+        body.updated_by = userAuth.username;
+
+
         const user = await defaultModel.create(body);
 
         return res.status(200).send({
@@ -122,7 +134,7 @@ exports.update = async (req, res) => {
             });
         }
 
-        const user = await defaultModel.get(params.id);
+        const user = await defaultModel.find(params.id);
         if (!user) {
             return res.status(400).send({
                 status: 'error',
@@ -137,8 +149,18 @@ exports.update = async (req, res) => {
                 'message': lang.t('global.err.validation_failed'),
                 'error': validationBody.error.details
             });
-            return false;
+
         }
+
+        const auth = req.auth;
+        const userAuth = await defaultModel.find(auth._id);
+        if (!userAuth) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+        body.updated_by = userAuth.username;
 
         const updateUser = await defaultModel.update(user._id, body);
 
@@ -251,16 +273,26 @@ exports.delete = async (req, res) => {
                 'message': lang.t('global.err.validation_failed'),
                 'error': validationParams.error.details
             });
-            return false;
+
         }
 
-        const user = await defaultModel.get(params.id);
+        const user = await defaultModel.find(params.id);
         if (!user) {
             return res.status(400).send({
                 status: 'error',
                 message: lang.t('user.err.not_exists')
             });
         }
+
+        const auth = req.auth;
+        const userAuth = await defaultModel.find(auth._id);
+        if (!userAuth) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+        body.updated_by = userAuth.username;
 
         const deletedUser = await defaultModel.delete(user._id);
 
@@ -286,7 +318,7 @@ exports.profile = async (req, res) => {
 
         const auth = req.auth;
 
-        const user = await defaultModel.get(auth._id);
+        const user = await defaultModel.find(auth._id);
         if (!user) {
             return res.status(400).send({
                 status: 'error',
@@ -316,7 +348,7 @@ exports.logout = async (req, res) => {
 
         const auth = req.auth;
 
-        const user = await defaultModel.get(auth._id);
+        const user = await defaultModel.find(auth._id);
         if (!user) {
             return res.status(400).send({
                 status: 'error',

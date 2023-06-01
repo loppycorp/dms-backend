@@ -21,8 +21,8 @@ exports.create = async (data) => {
         username: data.username,
         hash_password: bcrypt.hashSync(data.password, 10),
         token: data.token,
-        role: USER_ROLE_USER,
-        department: [data.department],
+        role: data.role,
+        department: data.department,
         status: STATUS_ACTIVE,
         date_created: new Date(),
         date_updated: new Date(),
@@ -61,7 +61,7 @@ exports.validateCreds = async (username, password) => {
         [username, STATUS_ACTIVE]
     );
 
-    console.log(queryResult)
+
     const user = queryResult[0] || null;
     if (!user) return false;
 
@@ -100,7 +100,6 @@ exports.validateToken = async (id, token) => {
     );
 
     const user = queryResult[0] || null;
-    console.log(queryResult)
     return user;
 };
 
@@ -108,21 +107,19 @@ exports.update = async (id, data) => {
     const attributes = {
         first_name: data.first_name,
         last_name: data.last_name,
-        full_name: data.full_name,
+        full_name: data.first_name + " " + data.last_name,
         email: data.email,
         username: data.username,
-        hash_password: data.hash_password,
+        hash_password: bcrypt.hashSync(data.password, 10),
         role: data.role,
         date_updated: new Date(),
         updated_by: data.updated_by
     };
 
-    data.hash_password = bcrypt.hashSync(data.password, 10);
-
-    const update = await db.query(`UPDATE users SET ? WHERE id = ${id}`, { ...attributes });
+    const update = await db.query(`UPDATE users SET ? WHERE _id = ${id}`, { ...attributes });
 
     if (update) {
-        const queryResult = await db.query(`SELECT * FROM users WHERE id = ${id} AND status = '${STATUS_ACTIVE}'`);
+        const queryResult = await db.query(`SELECT * FROM users WHERE _id = ${id} AND status = '${STATUS_ACTIVE}'`);
         return queryResult[0] ? queryResult[0] : null;
     }
 
@@ -144,10 +141,10 @@ exports.storeToken = async (id, token) => {
 exports.delete = async (id) => {
     const attributes = { status: STATUS_INACTIVE };
 
-    const update = await db.query(`UPDATE users SET ? WHERE id = ${id}`, { ...attributes });
+    const update = await db.query(`UPDATE users SET ? WHERE _id = ${id}`, { ...attributes });
 
     if (update) {
-        const queryResult = await db.query(`SELECT * FROM users WHERE id = ${id} AND status = '${STATUS_INACTIVE}'`);
+        const queryResult = await db.query(`SELECT * FROM users WHERE _id = ${id} AND status = '${STATUS_INACTIVE}'`);
         return queryResult[0] ? queryResult[0] : null;
     }
 

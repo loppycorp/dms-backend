@@ -20,6 +20,18 @@ exports.create = async (req, res) => {
             return false;
         }
 
+        const auth = req.auth;
+        const userAuth = await defaultModel.find(auth._id);
+        if (!userAuth) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+
+        body.created_by = userAuth.username;
+        body.updated_by = userAuth.username;
+
         const driverDetail = await defaultModel.create(body);
 
         res.status(200).send({
@@ -54,6 +66,16 @@ exports.update = async (req, res) => {
             });
             return false;
         }
+
+        const auth = req.auth;
+        const userAuth = await defaultModel.find(auth._id);
+        if (!userAuth) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+        body.updated_by = userAuth.username;
 
         const driverDetail = await defaultModel.find(params.id);
 
@@ -152,6 +174,16 @@ exports.delete = async (req, res) => {
                 message: lang.t('driver.err.read')
             });
         }
+
+        const auth = req.auth;
+        const userAuth = await defaultModel.find(auth._id);
+        if (!userAuth) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+        body.updated_by = userAuth.username;
 
         const deletedProfitCenter = await defaultModel.delete(driverDetail.id)
 
