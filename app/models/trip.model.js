@@ -6,11 +6,6 @@ const STATUS_ACTIVE = 'ACTIVE';
 const STATUS_INACTIVE = 'INACTIVE';
 const STATUS_DELETED = 'DELETED';
 
-const USER_ROLE_ADMIN = 'ADMIN';
-const USER_ROLE_HEAD = 'HEAD DEPARTMENT';
-const USER_ROLE_USER = 'USER';
-
-
 
 exports.create = async (data) => {
     const attributes = {
@@ -18,8 +13,6 @@ exports.create = async (data) => {
         last_name: data.last_name,
         full_name: data.first_name + " " + data.last_name,
         email: data.email,
-        local_number: data.local_number,
-        contact_number: data.contact_number,
         username: data.username,
         hash_password: bcrypt.hashSync(data.password, 10),
         token: data.token,
@@ -42,37 +35,6 @@ exports.create = async (data) => {
     throw new Error('Error on creating driver record!');
 }
 
-// exports.validateCreds = async (data) => {
-//     const queryResult = await db.query(
-//         `SELECT * FROM users WHERE username = '${data}' AND status = '${STATUS_ACTIVE}'`
-//     );
-
-//     console.log(queryResult)
-//     const user = queryResult[0] || null;
-//     if (!user) return false;
-
-//     const pass = await bcrypt.compare(data.password, user.hash_password);
-//     if (!pass) return false;
-
-//     return user;
-// };
-
-exports.validateCreds = async (username, password) => {
-    const queryResult = await db.query(
-        `SELECT * FROM users WHERE username = ? AND status = ?`,
-        [username, STATUS_ACTIVE]
-    );
-
-
-    const user = queryResult[0] || null;
-    if (!user) return false;
-
-    const pass = await bcrypt.compare(password, user.hash_password);
-    if (!pass) return false;
-
-    return user;
-};
-
 exports.find = async (id) => {
     const queryResult = await db.query(
         `SELECT a._id, a.first_name, a.last_name, a.full_name, a.username, a.email, b.name as department, a.role FROM users AS a JOIN departments AS b ON b._id = a.department WHERE a._id = ${id} AND a.status = '${STATUS_ACTIVE}'`);
@@ -88,22 +50,12 @@ exports.find = async (id) => {
 
 exports.findAll = async () => {
     const queryResults = await db.query(
-        `SELECT a._id, a.full_name, a.username, a.email, a.local_number, a.contact_number, b.name as department, a.role FROM users AS a JOIN departments AS b ON b._id = a.department WHERE a.status = '${STATUS_ACTIVE}'`
+        `SELECT a._id, a.full_name, a.username, a.email, b.name as department, a.role FROM users AS a JOIN departments AS b ON b._id = a.department WHERE a.status = '${STATUS_ACTIVE}'`
     );
 
     return queryResults || [];
 };
 
-
-exports.validateToken = async (id, token) => {
-    const queryResult = await db.query(
-        `SELECT * FROM users WHERE _id = ? AND token = ?`,
-        [id, token]
-    );
-
-    const user = queryResult[0] || null;
-    return user;
-};
 
 exports.update = async (id, data) => {
     const attributes = {
@@ -128,17 +80,6 @@ exports.update = async (id, data) => {
     throw new Error('Error on updating user record!');
 }
 
-exports.storeToken = async (id, token) => {
-    const updateQuery = `UPDATE users SET token = ? WHERE _id = ?`;
-    const updateParams = [token, id];
-
-    const updateResult = await db.query(updateQuery, updateParams);
-
-    if (updateResult.affectedRows === 0) return false;
-
-    return updateResult;
-};
-
 
 exports.delete = async (id) => {
     const attributes = { status: STATUS_INACTIVE };
@@ -157,7 +98,3 @@ exports.delete = async (id) => {
 exports.STATUS_ACTIVE = STATUS_ACTIVE;
 exports.STATUS_INACTIVE = STATUS_INACTIVE;
 exports.STATUS_DELETED = STATUS_DELETED;
-
-module.exports.USER_ROLE_ADMIN = USER_ROLE_ADMIN;
-module.exports.USER_ROLE_USER = USER_ROLE_USER;
-module.exports.USER_ROLE_HEAD = USER_ROLE_HEAD;
