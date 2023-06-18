@@ -1,0 +1,351 @@
+const db = require('../../config/mysql.db');
+const { logger } = require('../middlewares/logging.middleware');
+const lang = require('../helpers/lang.helper');
+const utilities = require('../helpers/utilities.helper');
+const defaultModel = require('../models/trip.model');
+const usersAuth = require('../models/user.model');
+const { paramsSchema } = require('../helpers/validations/common.validation');
+const { createSchema, updateSchema } = require('../helpers/validations/trip.schema');
+
+const STATUS_ACTIVE = 'ACTIVE';
+
+exports.create = async (req, res) => {
+    try {
+        logger.info(req.path);
+
+        const body = req.body;
+
+        const validationBody = createSchema.validate(body, { abortEarly: false });
+        if (validationBody.error) {
+            return res.status(400).send({
+                'status': 'error',
+                'message': lang.t('global.err.validation_failed'),
+                'error': validationBody.error.details
+            });
+
+        }
+
+        const auth = req.auth;
+        const userAuth = await usersAuth.find(auth._id);
+        if (!userAuth) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+        body.requested_by = `${userAuth.first_name} ${userAuth.last_name}`;
+        body.department = userAuth.department;
+        body.email = userAuth.email;
+        body.local_number = userAuth.local_number;
+        body.contact_number = userAuth.contact_number;
+        body.created_by = userAuth.username;
+        body.updated_by = userAuth.username;
+
+        const trips = await defaultModel.create(body);
+
+        return res.status(200).send({
+            status: 'success',
+            message: lang.t('trip.suc.create'),
+            data: trips
+        });
+    } catch (err) {
+        logger.error(req.path);
+        logger.error(err);
+
+        return res.status(500).send({
+            status: 'error',
+            message: utilities.getMessage(err)
+        });
+    }
+};
+
+exports.update = async (req, res) => {
+    try {
+        logger.info(req.path);
+
+        const body = req.body;
+        const params = req.params;
+
+        const validationParams = paramsSchema.validate(params, { abortEarly: false });
+        if (validationParams.error) {
+            return res.status(400).send({
+                'status': 'error',
+                'message': lang.t('global.err.validation_failed'),
+                'error': validationParams.error.details
+            });
+        }
+
+        const user = await defaultModel.find(params.id);
+        if (!user) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+
+        const validationBody = updateSchema.validate(body, { abortEarly: false });
+        if (validationBody.error) {
+            return res.status(400).send({
+                'status': 'error',
+                'message': lang.t('global.err.validation_failed'),
+                'error': validationBody.error.details
+            });
+
+        }
+
+        const auth = req.auth;
+        const userAuth = await defaultModel.find(auth._id);
+        if (!userAuth) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+        body.updated_by = userAuth.username;
+
+        const updateUser = await defaultModel.update(user._id, body);
+
+        return res.status(200).send({
+            status: 'success',
+            message: lang.t('user.suc.update'),
+            data: updateUser
+        });
+    } catch (err) {
+        logger.error(req.path);
+        logger.error(err);
+
+        return res.status(500).send({
+            status: 'error',
+            message: utilities.getMessage(err)
+        });
+    }
+};
+
+exports.read = async (req, res) => {
+    try {
+        logger.info(req.path);
+
+        const params = req.params;
+
+        const validationParams = paramsSchema.validate(params, { abortEarly: false });
+        if (validationParams.error) {
+            return res.status(400).send({
+                'status': 'error',
+                'message': lang.t('global.err.validation_failed'),
+                'error': validationParams.error.details
+            });
+            return false;
+        }
+
+        const user = await defaultModel.find(params.id);
+        if (!user) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+
+        return res.status(200).send({
+            status: 'success',
+            message: lang.t('user.suc.read'),
+            data: user
+        });
+    } catch (err) {
+        logger.error(req.path);
+        logger.error(err);
+
+        return res.status(500).send({
+            status: 'error',
+            message: utilities.getMessage(err)
+        });
+    }
+};
+
+exports.search = async (req, res) => {
+    try {
+        logger.info(req.path);
+
+        const query = req.query;
+        const auth = req.auth;
+        const pagination = query.pagination;
+        const { pageNum, pageLimit, sortOrder, sortBy } = pagination;
+
+        const userAuth = await usersAuth.find(auth._id);
+        if (!userAuth) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+
+        const data = await defaultModel.findAll(userAuth);
+
+        const totalResult = await db.query(`
+        SELECT COUNT(*) as total FROM trips WHERE status = '${STATUS_ACTIVE}'`);
+
+        const totalPending = await db.query(`
+        SELECT COUNT(*) as total FROM trips WHERE status = '${STATUS_ACTIVE}' AND ticket_status = '${defaultModel.TICKET_STATUS_PENDING}'`);
+
+        const totalOngoing = await db.query(`
+        SELECT COUNT(*) as total FROM trips WHERE status = '${STATUS_ACTIVE}' AND ticket_status = '${defaultModel.TICKET_STATUS_ONGOING}'`);
+
+        const totalComplete = await db.query(`
+        SELECT COUNT(*) as total FROM trips WHERE status = '${STATUS_ACTIVE}' AND  ticket_status = '${defaultModel.TICKET_STATUS_COMPLETE}'`);
+
+        const total = totalResult[0].total || 0;
+        const total1 = totalPending[0].total || 0;
+        const total2 = totalOngoing[0].total || 0;
+        const total3 = totalComplete[0].total || 0;
+
+
+
+
+
+        return res.status(200).send({
+            status: 'success',
+            message: lang.t('trip.suc.search'),
+            data: data,
+            pagination: {
+                page_num: pageNum,
+                page_limit: pageLimit,
+                page_count: data ? data.length : 0,
+                sort_order: sortOrder,
+                sort_by: sortBy,
+                total_result: total,
+                stats: {
+                    pending: total1,
+                    ongoing: total2,
+                    complete: total3
+                }
+            }
+        });
+    } catch (err) {
+        logger.error(req.path);
+        logger.error(err);
+
+        return res.status(500).send({
+            status: 'error',
+            message: utilities.getMessage(err)
+        });
+    }
+};
+
+exports.delete = async (req, res) => {
+    try {
+        logger.info(req.path);
+
+        const params = req.params;
+
+        const validationParams = paramsSchema.validate(params, { abortEarly: false });
+        if (validationParams.error) {
+            return res.status(400).send({
+                'status': 'error',
+                'message': lang.t('global.err.validation_failed'),
+                'error': validationParams.error.details
+            });
+
+        }
+
+        const user = await defaultModel.find(params.id);
+        if (!user) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+
+        const auth = req.auth;
+        const userAuth = await defaultModel.find(auth._id);
+        if (!userAuth) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+        body.updated_by = userAuth.username;
+
+        const deletedUser = await defaultModel.delete(user._id);
+
+        return res.status(200).send({
+            status: 'success',
+            message: lang.t('user.suc.delete'),
+            data: deletedUser
+        });
+    } catch (err) {
+        logger.error(req.path);
+        logger.error(err);
+
+        return res.status(500).send({
+            status: 'error',
+            message: utilities.getMessage(err)
+        });
+    }
+};
+
+exports.profile = async (req, res) => {
+    try {
+        logger.info(req.path);
+
+        const auth = req.auth;
+
+        const user = await defaultModel.find(auth._id);
+        if (!user) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+
+        return res.status(200).send({
+            status: 'success',
+            message: lang.t('user.suc.profile'),
+            data: user
+        });
+    } catch (err) {
+        logger.error(req.path);
+        logger.error(err);
+
+        return res.status(500).send({
+            status: 'error',
+            message: utilities.getMessage(err)
+        });
+    }
+};
+
+exports.logout = async (req, res) => {
+    try {
+        logger.info(req.path);
+
+        const auth = req.auth;
+
+        const user = await defaultModel.find(auth._id);
+        if (!user) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+
+        const destroyedToken = await defaultModel.destroyToken(auth._id);
+        if (!destroyedToken) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.token_failed_destroyed')
+            });
+        }
+
+        return res.status(200).send({
+            status: 'success',
+            message: lang.t('user.suc.logout'),
+            data: user
+        });
+    } catch (err) {
+        logger.error(req.path);
+        logger.error(err);
+
+        return res.status(500).send({
+            status: 'error',
+            message: utilities.getMessage(err)
+        });
+    }
+};

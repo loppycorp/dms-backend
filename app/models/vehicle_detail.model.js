@@ -12,7 +12,7 @@ const VEHICLE_STATUS_MAINTENANCE = 'UNDER MAINTENANCE';
 
 exports.create = async (data) => {
     const attributes = {
-        plate_number: data.employee_number,
+        plate_number: data.plate_number,
         model: data.model,
         year_model: data.year_model,
         vehicle_status: VEHICLE_STATUS_AVAILABLE,
@@ -34,7 +34,7 @@ exports.create = async (data) => {
 }
 
 exports.find = async (id) => {
-    const queryResult = await db.query(`SELECT * FROM vehicle_details WHERE id = ${id} AND status = '${STATUS_ACTIVE}'`);
+    const queryResult = await db.query(`SELECT * FROM vehicle_details WHERE _id = ${id} AND status = '${STATUS_ACTIVE}'`);
 
     return queryResult[0] ? queryResult[0] : null;
 };
@@ -47,7 +47,7 @@ exports.findAll = async (id) => {
 
 exports.update = async (id, data) => {
     const attributes = {
-        plate_number: data.employee_number,
+        plate_number: data.plate_number,
         model: data.model,
         year_model: data.year_model,
         vehicle_status: data.vehicle_status,
@@ -55,10 +55,10 @@ exports.update = async (id, data) => {
         updated_by: data.updated_by
     };
 
-    const update = await db.query(`UPDATE vehicle_details SET ? WHERE id = ${id}`, { ...attributes });
+    const update = await db.query(`UPDATE vehicle_details SET ? WHERE _id = ${id}`, { ...attributes });
 
     if (update) {
-        const queryResult = await db.query(`SELECT * FROM vehicle_details WHERE id = ${id} AND status = '${STATUS_ACTIVE}'`);
+        const queryResult = await db.query(`SELECT * FROM vehicle_details WHERE _id = ${id} AND status = '${STATUS_ACTIVE}'`);
         return queryResult[0] ? queryResult[0] : null;
     }
 
@@ -72,10 +72,10 @@ exports.updateStatus = async (id, data) => {
         updated_by: data.updated_by
     };
 
-    const update = await db.query(`UPDATE vehicle_details SET ? WHERE id = ${id}`, { ...attributes });
+    const update = await db.query(`UPDATE vehicle_details SET ? WHERE _id = ${id}`, { ...attributes });
 
     if (update) {
-        const queryResult = await db.query(`SELECT * FROM vehicle_details WHERE id = ${id} AND status = '${STATUS_ACTIVE}'`);
+        const queryResult = await db.query(`SELECT * FROM vehicle_details WHERE _id = ${id} AND status = '${STATUS_ACTIVE}'`);
         return queryResult[0] ? queryResult[0] : null;
     }
 
@@ -85,10 +85,10 @@ exports.updateStatus = async (id, data) => {
 exports.delete = async (id) => {
     const attributes = { status: STATUS_INACTIVE };
 
-    const update = await db.query(`UPDATE vehicle_details SET ? WHERE id = ${id}`, { ...attributes });
+    const update = await db.query(`UPDATE vehicle_details SET ? WHERE _id = ${id}`, { ...attributes });
 
     if (update) {
-        const queryResult = await db.query(`SELECT * FROM vehicle_details WHERE id = ${id} AND status = '${STATUS_INACTIVE}'`);
+        const queryResult = await db.query(`SELECT * FROM vehicle_details WHERE _id = ${id} AND status = '${STATUS_INACTIVE}'`);
         return queryResult[0] ? queryResult[0] : null;
     }
 

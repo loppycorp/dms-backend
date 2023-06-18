@@ -10,9 +10,7 @@ const defaultSchema = Joi.object({
     driver_status: Joi.string().trim().valid(
         defaultModel.DRIVER_STATUS_AVAILABLE,
         defaultModel.DRIVER_STATUS_UNAVAILABLE
-    ),
-    created_by: Joi.string().trim().max(DEFAULT_MAX_CHAR).required(),
-    updated_by: Joi.string().trim().max(DEFAULT_MAX_CHAR).required()
+    )
 
 });
 

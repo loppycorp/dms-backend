@@ -1,8 +1,12 @@
 const { logger } = require('../middlewares/logging.middleware');
 const lang = require('../helpers/lang.helper');
 const defaultModel = require('../models/driver_detail.model');
+const usersAuth = require('../models/user.model');
 const utilities = require('../helpers/utilities.helper');
 const { createSchema, updateSchema } = require('../helpers/validations/driver_detail.schema');
+const db = require('../../config/mysql.db');
+const STATUS_ACTIVE = 'ACTIVE';
+
 
 exports.create = async (req, res) => {
     try {
@@ -21,7 +25,7 @@ exports.create = async (req, res) => {
         }
 
         const auth = req.auth;
-        const userAuth = await defaultModel.find(auth._id);
+        const userAuth = await usersAuth.find(auth._id);
         if (!userAuth) {
             return res.status(400).send({
                 status: 'error',
@@ -136,29 +140,46 @@ exports.get = async (req, res) => {
     }
 };
 
-exports.getAll = async (req, res) => {
+exports.search = async (req, res) => {
     try {
         logger.info(req.path);
 
         const query = req.query;
+        const pagination = query.pagination;
+        const { pageNum, pageLimit, sortOrder, sortBy } = pagination;
 
-        const profitCenters = await defaultModel.findAll(query);
+        const data = await defaultModel.findAll(query);
 
-        res.status(200).send({
+        const totalResult = await db.query(`
+        SELECT COUNT(*) as total FROM driver_details WHERE status = '${STATUS_ACTIVE}'`);
+
+        const total = totalResult[0].total || 0;
+
+
+        return res.status(200).send({
             status: 'success',
-            message: lang.t('driver.suc.search'),
-            data: profitCenters
+            message: lang.t('department.suc.search'),
+            data: data,
+            pagination: {
+                page_num: pageNum,
+                page_limit: pageLimit,
+                page_count: data ? data.length : 0,
+                sort_order: sortOrder,
+                sort_by: sortBy,
+                total_result: total
+            }
         });
     } catch (err) {
         logger.error(req.path);
         logger.error(err);
 
-        res.status(500).send({
+        return res.status(500).send({
             status: 'error',
             message: utilities.getMessage(err)
         });
     }
 };
+
 
 exports.delete = async (req, res) => {
     try {

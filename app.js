@@ -23,6 +23,7 @@ require('./app/routes/driver_detail.routes.js')(app);
 require('./app/routes/vehicle_detail.routes.js')(app);
 require('./app/routes/department.routes.js')(app);
 require('./app/routes/user.routes.js')(app);
+require('./app/routes/trip.routes.js')(app);
 
 
 const port = process.env.APP_PORT || 3200;

@@ -15,6 +15,11 @@ exports.create = async (data) => {
         updated_by: data.updated_by
     };
 
+    const validation = await db.query(`SELECT * FROM departments WHERE name = '${data.name}' AND status = '${STATUS_ACTIVE}'`);
+    if (validation.length > 0) {
+        throw new Error(`${data.name} is already exists`);
+    }
+
     const queryResult = await db.query('INSERT INTO departments SET ?', attributes);
 
     const result = queryResult[0] || queryResult;
@@ -32,17 +37,14 @@ exports.find = async (id) => {
 };
 
 exports.findAll = async (id) => {
-    const queryResults = await db.query(`SELECT * FROM departments WHERE status = '${STATUS_ACTIVE}'`);
+    const queryResults = await db.query(`SELECT name, DATE_FORMAT(date_created, '%Y-%m-%d') as date_created, DATE_FORMAT(date_updated, '%Y-%m-%d') as date_updated, created_by FROM departments WHERE status = '${STATUS_ACTIVE}'`);
 
     return queryResults ? queryResults : [];
 };
 
 exports.update = async (id, data) => {
     const attributes = {
-        employee_number: data.employee_number,
         name: data.name,
-        contact_number: data.contact_number,
-        driver_status: data.driver_status,
         date_updated: new Date(),
         updated_by: data.updated_by
     };

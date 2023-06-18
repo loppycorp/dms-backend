@@ -99,4 +99,18 @@ exports.STATUS_INACTIVE = STATUS_INACTIVE;
 exports.STATUS_DELETED = STATUS_DELETED;
 
 exports.DRIVER_STATUS_AVAILABLE = DRIVER_STATUS_AVAILABLE;
-exports.DRIVER_STATUS_UNAVAILABLE = DRIVER_STATUS_UNAVAILABLE
+exports.DRIVER_STATUS_UNAVAILABLE = DRIVER_STATUS_UNAVAILABLE;
+
+// DB
+// CREATE TABLE dms.driver_details (
+// 	_id INT AUTO_INCREMENT PRIMARY KEY,
+//     employee_number VARCHAR(255),
+//     name VARCHAR(255),
+//     contact_number VARCHAR(20),
+//     driver_status VARCHAR(20),
+//     status VARCHAR(20),
+//     date_created DATETIME,
+//     date_updated DATETIME,
+//     created_by VARCHAR(255),
+//     updated_by VARCHAR(255)
+// );

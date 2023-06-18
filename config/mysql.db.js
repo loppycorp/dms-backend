@@ -13,14 +13,12 @@ const options = {
     queueLimit: 0,
 };
 
-console.log(options);
 
 const pool = mysql.createPool(options);
 
 exports.pool = pool;
 exports.query = async (query, attributes) => {
     try {
-        console.log(attributes);
         const queryResult = await pool.query(query, attributes);
         const [row] = queryResult;
 

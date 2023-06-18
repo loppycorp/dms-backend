@@ -12,8 +12,6 @@ const defaultSchema = Joi.object({
         defaultModel.VEHICLE_STATUS_UNAVAILABLE,
         defaultModel.VEHICLE_STATUS_MAINTENANCE
     ),
-    created_by: Joi.string().trim().max(DEFAULT_MAX_CHAR).required(),
-    updated_by: Joi.string().trim().max(DEFAULT_MAX_CHAR).required()
 
 });
 

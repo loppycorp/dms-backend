@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container mx-auto p-4">
+      <h1 class="text-2xl font-bold">Trip Request’s Details</h1>
+      <hr class="my-4" />
+      <div>
+        <div class="mb-2">
+          <span class="font-bold">Request Type:</span>
+          <span>{{data.requestType}}</span>
+        </div>
+        <div class="mb-2">
+          <span class="font-bold">Requested By:</span>
+          <span>{{data.requestedBy}}</span>
+        </div>
+        <div class="mb-2">
+          <span class="font-bold">Created At:</span>
+          <span>{{data.createdAt}}</span>
+        </div>
+        <div class="mb-2">
+          <span class="font-bold">Destination:</span>
+          <span>{{data.destination}}</span>
+        </div>
+        <div class="mb-2">
+          <span class="font-bold">Trip Type:</span>
+          <span>{{data.tripType}}</span>
+        </div>
+        <div class="mb-2">
+          <span class="font-bold">Passenger Type:</span>
+          <span>{{data.passengerType}}</span>
+        </div>
+        <div class="mb-2">
+          <span class="font-bold">Priority:</span>
+          <span>{{data.priority}}</span>
+        </div>
+        <div class="mb-2">
+          <span class="font-bold">Driver:</span>
+          <span>{{data.driver}}</span>
+        </div>
+        <div class="mb-2">
+          <span class="font-bold">Vehicle/Plate No.:</span>
+          <span>{{data.vehiclePlateNo}}</span>
+        </div>
+        <div class="mb-2">
+          <span class="font-bold">Contact No.:</span>
+          <span>{{data.contactNo}}</span>
+        </div>
+      </div>
+      <hr class="my-4" />
+      <div class="mb-2">
+        <span class="font-bold">Portal Link:</span>
+        <a href="{{data.portalLink}}" class="text-blue-500"
+          >{{data.portalLink}}</a
+        >
+      </div>
+      <div class="mt-4">
+        <p>Thank you and Regards,</p>
+        <p>{{data.senderName}}</p>
+        <p>{{data.senderDivision}}</p>
+      </div>
+    </div>
+  </body>
+</html>
