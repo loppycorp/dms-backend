@@ -44,35 +44,6 @@ function formatDate(dateStr) {
 
 
 exports.create = async (data) => {
-    const jsonData = {
-        header: {
-            company: data.company,
-            cost_center: data.cost_center,
-            date_of_trip_to: formatDate(data.date_of_trip_to),
-            date_of_trip_from: formatDate(data.date_of_trip_from),
-            passenger_type: data.passenger_type,
-            total_of_passengers: data.total_of_passengers,
-            purpose_of_trip: data.purpose_of_trip,
-            pick_up_time: data.pick_up_time,
-            pick_up_location: data.pick_up_location,
-            estimate_time_of_return: data.estimate_time_of_return,
-            trip_type: data.trip_type,
-            priority: data.priority,
-            type: TICKET_TYPE,
-            ticket_status: TICKET_STATUS_PENDING,
-            remarks: data.remarks,
-            errands: data.errands,
-        },
-        trip: {
-            details: [{
-                destination: data.destination,
-                contact_person: data.contact_person,
-                driver: data.driver,
-                vehicle: data.vehicle,
-            }]
-        },
-    };
-
     const attributes = {
         date_of_request: new Date(),
         requested_by: data.requested_by,
@@ -94,7 +65,7 @@ exports.create = async (data) => {
         estimate_time_of_return: data.estimate_time_of_return,
         trip_type: data.trip_type,
         priority: data.priority,
-        driver: data.driver,
+        driver: [data.driver],
         vehicle: data.vehicle,
         type: TICKET_TYPE,
         ticket_status: TICKET_STATUS_PENDING,
@@ -134,13 +105,13 @@ exports.findAll = async (user) => {
     console.log(user.role)
     if (user.role == USER_ROLE_ADMIN) {
         const queryResults = await db.query(
-            `SELECT a._id, a.type, a.requested_by, b.name as driver_name, c.plate_number, a.date_of_request, a.ticket_status, a.status, a.date_created, a.date_updated  
+            `SELECT a.type, a.requested_by, b.name as driver_name, c.plate_number, a.date_of_request, a.ticket_status  
             from trips as a 
             JOIN driver_details as b ON a.driver = b._id
             JOIN vehicle_details as c ON a.vehicle = c._id
             WHERE a.status = '${STATUS_ACTIVE}'`
         );
-        return this.mapData(queryResults) || [];
+        return queryResults || [];
     } else if (user.role == USER_ROLE_HEAD) {
         const queryResults = await db.query(
             `SELECT a.type, a.requested_by, b.name as driver_name, c.plate_number, a.date_of_request, a.ticket_status  
@@ -285,23 +256,3 @@ exports.TRIP_TYPE_WT = TRIP_TYPE_WT;
 //     FOREIGN KEY (driver) REFERENCES driver_details(_id),
 //     FOREIGN KEY (vehicle) REFERENCES vehicle_details(_id)
 //   );
-
-exports.mapData = (data) => {
-    return data.map((o) => {
-        return {
-            _id: o._id,
-            header: {
-                type: o.type,
-                requested_by: o.requested_by,
-                driver_name: o.name,
-                plate_number: o.plate_number,
-                date_of_request: o.date_of_request,
-                ticket_status: o.ticket_status
-            },
-            status: o.status,
-            date_created: o.date_created,
-            date_updated: o.date_updated
-        }
-    })
-};
-

@@ -31,8 +31,8 @@ const defaultSchema = Joi.object({
         defaultModel.PRIORITY_STD,
         defaultModel.PRIORITY_URG
     ),
-    driver: Joi.number().required(),
-    vehicle: Joi.number().required(),
+    driver: [Joi.number().required()],
+    vehicle: [Joi.number().required()],
     remarks: Joi.string().max(LIMIT_DEFAULT_CHAR).allow(""),
     errands: Joi.string().max(LIMIT_DEFAULT_CHAR).allow(""),
 
