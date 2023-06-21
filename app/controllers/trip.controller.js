@@ -180,6 +180,7 @@ exports.search = async (req, res) => {
 
         const data = await defaultModel.findAll(userAuth);
 
+        console.log(data)
         const totalResult = await db.query(`
         SELECT COUNT(*) as total FROM trips WHERE status = '${STATUS_ACTIVE}'`);
 
@@ -218,6 +219,63 @@ exports.search = async (req, res) => {
                     complete: total3
                 }
             }
+        });
+    } catch (err) {
+        logger.error(req.path);
+        logger.error(err);
+
+        return res.status(500).send({
+            status: 'error',
+            message: utilities.getMessage(err)
+        });
+    }
+};
+
+exports.approved = async (req, res) => {
+    try {
+        logger.info(req.path);
+
+        const params = req.params;
+
+        const validationParams = paramsSchema.validate(params, { abortEarly: false });
+        if (validationParams.error) {
+            return res.status(400).send({
+                'status': 'error',
+                'message': lang.t('global.err.validation_failed'),
+                'error': validationParams.error.details
+            });
+
+        }
+
+        const defaultVariable = await defaultModel.find(params.id);
+        if (!defaultVariable) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('err.not_exists')
+            });
+        }
+
+        const auth = req.auth;
+        const userAuth = await usersAuth.find(auth._id);
+        if (!userAuth) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+
+        const data = await defaultModel.headApproval(defaultVariable._id, userAuth);
+
+        if (!data) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('This ticket is for Head Department only or ticket is already ongoing'),
+            });
+        }
+        return res.status(200).send({
+            status: 'success',
+            message: lang.t('user.suc.delete'),
+            data: data
         });
     } catch (err) {
         logger.error(req.path);
@@ -282,70 +340,3 @@ exports.delete = async (req, res) => {
     }
 };
 
-exports.profile = async (req, res) => {
-    try {
-        logger.info(req.path);
-
-        const auth = req.auth;
-
-        const user = await defaultModel.find(auth._id);
-        if (!user) {
-            return res.status(400).send({
-                status: 'error',
-                message: lang.t('user.err.not_exists')
-            });
-        }
-
-        return res.status(200).send({
-            status: 'success',
-            message: lang.t('user.suc.profile'),
-            data: user
-        });
-    } catch (err) {
-        logger.error(req.path);
-        logger.error(err);
-
-        return res.status(500).send({
-            status: 'error',
-            message: utilities.getMessage(err)
-        });
-    }
-};
-
-exports.logout = async (req, res) => {
-    try {
-        logger.info(req.path);
-
-        const auth = req.auth;
-
-        const user = await defaultModel.find(auth._id);
-        if (!user) {
-            return res.status(400).send({
-                status: 'error',
-                message: lang.t('user.err.not_exists')
-            });
-        }
-
-        const destroyedToken = await defaultModel.destroyToken(auth._id);
-        if (!destroyedToken) {
-            return res.status(400).send({
-                status: 'error',
-                message: lang.t('user.err.token_failed_destroyed')
-            });
-        }
-
-        return res.status(200).send({
-            status: 'success',
-            message: lang.t('user.suc.logout'),
-            data: user
-        });
-    } catch (err) {
-        logger.error(req.path);
-        logger.error(err);
-
-        return res.status(500).send({
-            status: 'error',
-            message: utilities.getMessage(err)
-        });
-    }
-};

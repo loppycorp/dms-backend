@@ -74,7 +74,7 @@ exports.validateCreds = async (username, password) => {
 
 exports.find = async (id) => {
     const queryResult = await db.query(
-        `SELECT a._id, a.first_name, a.last_name, a.full_name as name, a.username, a.email, b.name as department, a.role FROM users AS a JOIN departments AS b ON b._id = a.department WHERE a._id = ${id} AND a.status = '${STATUS_ACTIVE}'`);
+        `SELECT a._id, a.first_name, a.last_name, a.full_name as name, a.username, a.email, b.name as department, a.local_number, a.contact_number, a.department as department_id, a.role FROM users AS a JOIN departments AS b ON b._id = a.department WHERE a._id = ${id} AND a.status = '${STATUS_ACTIVE}'`);
 
     return queryResult[0] ? queryResult[0] : null;
 };
