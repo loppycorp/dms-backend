@@ -304,29 +304,28 @@ exports.delete = async (req, res) => {
 
         }
 
-        const user = await defaultModel.find(params.id);
-        if (!user) {
+        const defaultVariable = await defaultModel.find(params.id);
+        if (!defaultVariable) {
             return res.status(400).send({
                 status: 'error',
-                message: lang.t('user.err.not_exists')
+                message: lang.t('trip.err.not_exists')
             });
         }
 
         const auth = req.auth;
-        const userAuth = await defaultModel.find(auth._id);
+        const userAuth = await usersAuth.find(auth._id);
         if (!userAuth) {
             return res.status(400).send({
                 status: 'error',
                 message: lang.t('user.err.not_exists')
             });
         }
-        body.updated_by = userAuth.username;
 
-        const deletedUser = await defaultModel.delete(user._id);
+        const deletedUser = await defaultModel.delete(defaultVariable._id);
 
         return res.status(200).send({
             status: 'success',
-            message: lang.t('user.suc.delete'),
+            message: lang.t('trip.suc.delete'),
             data: deletedUser
         });
     } catch (err) {

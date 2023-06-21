@@ -118,7 +118,7 @@ exports.findAll = async (user) => {
     console.log(user.role)
     if (user.role == USER_ROLE_ADMIN) {
         const queryResults = await db.query(
-            `SELECT a.type, a.requested_by, b.name as driver_name, c.plate_number, a.date_of_request, a.ticket_status  
+            `SELECT a._id, a.type, a.requested_by, b.name as driver_name, c.plate_number, a.date_of_request, a.ticket_status  
             from trips as a 
             JOIN driver_details as b ON a.driver = b._id
             JOIN vehicle_details as c ON a.vehicle = c._id
@@ -127,7 +127,7 @@ exports.findAll = async (user) => {
         return queryResults || [];
     } else if (user.role == USER_ROLE_HEAD) {
         const queryResults = await db.query(
-            `SELECT a.type, a.requested_by, b.name as driver_name, c.plate_number, a.date_of_request, a.ticket_status  
+            `SELECT a._id, a.type, a.requested_by, b.name as driver_name, c.plate_number, a.date_of_request, a.ticket_status  
             from trips as a 
             JOIN driver_details as b ON a.driver = b._id
             JOIN vehicle_details as c ON a.vehicle = c._id
@@ -136,7 +136,7 @@ exports.findAll = async (user) => {
         return queryResults || [];
     } else {
         const queryResults = await db.query(
-            `SELECT a.type, a.requested_by, b.name as driver_name, c.plate_number, a.date_of_request, a.ticket_status  
+            `SELECT a._id, a.type, a.requested_by, b.name as driver_name, c.plate_number, a.date_of_request, a.ticket_status  
             from trips as a 
             JOIN driver_details as b ON a.driver = b._id
             JOIN vehicle_details as c ON a.vehicle = c._id

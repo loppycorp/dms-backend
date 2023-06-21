@@ -36,8 +36,8 @@ exports.find = async (id) => {
     return queryResult[0] ? queryResult[0] : null;
 };
 
-exports.findAll = async (id) => {
-    const queryResults = await db.query(`SELECT name, DATE_FORMAT(date_created, '%Y-%m-%d') as date_created, DATE_FORMAT(date_updated, '%Y-%m-%d') as date_updated, created_by FROM departments WHERE status = '${STATUS_ACTIVE}'`);
+exports.findAll = async () => {
+    const queryResults = await db.query(`SELECT _id, name, DATE_FORMAT(date_created, '%Y-%m-%d') as date_created, DATE_FORMAT(date_updated, '%Y-%m-%d') as date_updated, created_by FROM departments WHERE status = '${STATUS_ACTIVE}'`);
 
     return queryResults ? queryResults : [];
 };
