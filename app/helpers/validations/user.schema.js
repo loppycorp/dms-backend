@@ -13,7 +13,7 @@ const defaultSchema = Joi.object({
     password: Joi.string().trim().required().max(LIMIT_DEFAULT_CHAR),
     role: Joi.string().trim()
         .valid(defaultModel.USER_ROLE_ADMIN, defaultModel.USER_ROLE_USER, defaultModel.USER_ROLE_HEAD),
-    department: Joi.any()
+    department: Joi.any().allow("", null)
 
 });
 

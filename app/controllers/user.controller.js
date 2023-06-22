@@ -87,17 +87,17 @@ exports.create = async (req, res) => {
 
         }
 
-        const auth = req.auth;
-        const userAuth = await defaultModel.find(auth._id);
-        if (!userAuth) {
-            return res.status(400).send({
-                status: 'error',
-                message: lang.t('user.err.not_exists')
-            });
-        }
+        // const auth = req.auth;
+        // const userAuth = await defaultModel.find(auth._id);
+        // if (!userAuth) {
+        //     return res.status(400).send({
+        //         status: 'error',
+        //         message: lang.t('user.err.not_exists')
+        //     });
+        // }
 
-        body.created_by = userAuth.username;
-        body.updated_by = userAuth.username;
+        // body.created_by = userAuth.username;
+        // body.updated_by = userAuth.username;
 
 
         const user = await defaultModel.create(body);
