@@ -40,7 +40,8 @@ exports.authenticate = async (req, res) => {
             username: validatedUser.username,
             first_name: validatedUser.first_name,
             last_name: validatedUser.last_name,
-            email: validatedUser.email
+            email: validatedUser.email,
+            role: validatedUser.role
         };
 
         const jwtToken = jwt.sign(jwtPayload, process.env.JWT_KEY, { expiresIn: process.env.TOKEN_EXPIRY });
@@ -87,17 +88,17 @@ exports.create = async (req, res) => {
 
         }
 
-        // const auth = req.auth;
-        // const userAuth = await defaultModel.find(auth._id);
-        // if (!userAuth) {
-        //     return res.status(400).send({
-        //         status: 'error',
-        //         message: lang.t('user.err.not_exists')
-        //     });
-        // }
+        const auth = req.auth;
+        const userAuth = await defaultModel.find(auth._id);
+        if (!userAuth) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
 
-        // body.created_by = userAuth.username;
-        // body.updated_by = userAuth.username;
+        body.created_by = userAuth.username;
+        body.updated_by = userAuth.username;
 
 
         const user = await defaultModel.create(body);

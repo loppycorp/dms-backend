@@ -14,7 +14,7 @@ module.exports = (app) => {
     app.post(process.env.BASE_URL + '/users/logout', auth.validateToken, user.logout);
 
     // Create new user record
-    app.post(process.env.BASE_URL + '/users', user.create);
+    app.post(process.env.BASE_URL + '/users', auth.validateToken, user.create);
 
     // List available user records
     app.get(process.env.BASE_URL + '/users', auth.validateToken, pagination.setAttributes, user.search);
