@@ -292,7 +292,6 @@ exports.delete = async (req, res) => {
                 message: lang.t('user.err.not_exists')
             });
         }
-        body.updated_by = userAuth.username;
 
         const deletedUser = await defaultModel.delete(user._id);
 

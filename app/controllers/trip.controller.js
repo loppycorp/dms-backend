@@ -40,6 +40,7 @@ exports.create = async (req, res) => {
         body.contact_number = userAuth.contact_number;
         body.created_by = userAuth.username;
         body.updated_by = userAuth.username;
+        body.department_id = userAuth.department_id;
 
         const trips = await defaultModel.create(body);
 
@@ -94,7 +95,7 @@ exports.update = async (req, res) => {
         }
 
         const auth = req.auth;
-        const userAuth = await defaultModel.find(auth._id);
+        const userAuth = await usersAuth.find(auth._id);
         if (!userAuth) {
             return res.status(400).send({
                 status: 'error',
@@ -178,9 +179,8 @@ exports.search = async (req, res) => {
             });
         }
 
-        const data = await defaultModel.findAll(userAuth);
+        const data = await defaultModel.findAll(userAuth, query);
 
-        console.log(data)
         const totalResult = await db.query(`
         SELECT COUNT(*) as total FROM trips WHERE status = '${STATUS_ACTIVE}'`);
 
@@ -229,6 +229,7 @@ exports.search = async (req, res) => {
             message: utilities.getMessage(err)
         });
     }
+
 };
 
 exports.approved = async (req, res) => {
@@ -270,6 +271,63 @@ exports.approved = async (req, res) => {
             return res.status(400).send({
                 status: 'error',
                 message: lang.t('This ticket is for Head Department only or ticket is already ongoing'),
+            });
+        }
+        return res.status(200).send({
+            status: 'success',
+            message: lang.t('user.suc.delete'),
+            data: data
+        });
+    } catch (err) {
+        logger.error(req.path);
+        logger.error(err);
+
+        return res.status(500).send({
+            status: 'error',
+            message: utilities.getMessage(err)
+        });
+    }
+};
+
+exports.adminApproved = async (req, res) => {
+    try {
+        logger.info(req.path);
+
+        const params = req.params;
+
+        const validationParams = paramsSchema.validate(params, { abortEarly: false });
+        if (validationParams.error) {
+            return res.status(400).send({
+                'status': 'error',
+                'message': lang.t('global.err.validation_failed'),
+                'error': validationParams.error.details
+            });
+
+        }
+
+        const defaultVariable = await defaultModel.find(params.id);
+        if (!defaultVariable) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('err.not_exists')
+            });
+        }
+
+        const auth = req.auth;
+        const userAuth = await usersAuth.find(auth._id);
+        if (!userAuth) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+
+        const data = await defaultModel.adminApproval(defaultVariable._id, userAuth);
+
+        if (!data) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('Admin Approval Only'),
             });
         }
         return res.status(200).send({
@@ -338,4 +396,61 @@ exports.delete = async (req, res) => {
         });
     }
 };
+
+exports.complete = async (req, res) => {
+    try {
+        logger.info(req.path);
+
+        const params = req.params;
+
+        const validationParams = paramsSchema.validate(params, { abortEarly: false });
+        if (validationParams.error) {
+            return res.status(400).send({
+                'status': 'error',
+                'message': lang.t('global.err.validation_failed'),
+                'error': validationParams.error.details
+            });
+
+        }
+
+        const defaultVariable = await defaultModel.find(params.id);
+        if (!defaultVariable) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('trip.err.not_exists')
+            });
+        }
+
+        const auth = req.auth;
+        const userAuth = await usersAuth.find(auth._id);
+        if (!userAuth) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('user.err.not_exists')
+            });
+        }
+        const trip = await defaultModel.complete(defaultVariable._id, defaultVariable, userAuth);
+        if (!trip) {
+            return res.status(400).send({
+                status: 'error',
+                message: lang.t('Permission Denied'),
+            });
+        }
+
+        return res.status(200).send({
+            status: 'success',
+            message: lang.t('trip.complete'),
+            data: trip
+        });
+    } catch (err) {
+        logger.error(req.path);
+        logger.error(err);
+
+        return res.status(500).send({
+            status: 'error',
+            message: utilities.getMessage(err)
+        });
+    }
+};
+
 

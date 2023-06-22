@@ -6,20 +6,21 @@ const pagination = require('../middlewares/pagination.middleware');
 
 
 module.exports = (app) => {
-    // Create new profit-center record
     app.post(process.env.BASE_URL + '/trips', auth.validateToken, defaultController.create);
 
-    // List available profit-center records
     app.get(process.env.BASE_URL + '/trips', auth.validateToken, pagination.setAttributes, defaultController.search);
 
-    // View profit-center record
     app.get(process.env.BASE_URL + '/trips/:id', auth.validateToken, defaultController.read);
 
-    // Edit profit-center record
     app.put(process.env.BASE_URL + '/trips/:id', auth.validateToken, defaultController.update);
 
-    // Delete profit-center record
     app.delete(process.env.BASE_URL + '/trips/:id', auth.validateToken, defaultController.delete);
 
     app.put(process.env.BASE_URL + '/trips/:id/head', auth.validateToken, defaultController.approved);
+
+    app.put(process.env.BASE_URL + '/trips/:id/admin', auth.validateToken, defaultController.adminApproved);
+
+    app.put(process.env.BASE_URL + '/trips/:id/complete', auth.validateToken, defaultController.complete);
+
+
 };

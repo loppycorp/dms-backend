@@ -1,5 +1,7 @@
 const db = require('../../config/mysql.db');
 const sendEmail = require('../../config/sendEmail');
+const sendApprovedEmail = require('../../config/sendApprovedEmail');
+
 
 const USER_ROLE_ADMIN = 'ADMIN';
 const USER_ROLE_HEAD = 'HEAD DEPARTMENT';
@@ -11,7 +13,7 @@ const TICKET_STATUS_PENDING = 'PENDING';
 const TICKET_STATUS_APPROVED = 'APPROVED';
 const TICKET_STATUS_DECLINED = 'DECLINED';
 const TICKET_STATUS_ONGOING = 'ONGOING';
-const TICKET_STATUS_COMPLETE = 'COMPLETE';
+const TICKET_STATUS_COMPLETE = 'COMPLETED';
 
 const STATUS_ACTIVE = 'ACTIVE';
 const STATUS_INACTIVE = 'INACTIVE';
@@ -36,6 +38,8 @@ const TRIP_TYPE_WT = 'WAITING';
 
 const TRIP_HEAD_EMAIL = 'TRIP REQUEST: HEAD DEPARTMENT APPROVAL';
 const TRIP_ADMIN_EMAIL = 'TRIP REQUEST: ADMIN APPROVAL';
+const TRIP_APPROVED_EMAIL = 'TRIP REQUEST: APPROVED';
+
 
 
 function formatDate(dateStr) {
@@ -86,13 +90,14 @@ exports.create = async (data) => {
     const result = queryResult[0] || queryResult;
 
     const tripResult = await db.query(
-        `SELECT *, DATE_FORMAT(a.date_created, '%Y-%m-%d') from trips as a  JOIN driver_details as b ON a.driver = b._id
-        JOIN vehicle_details as c ON a.vehicle = c._id
+        `SELECT *, DATE_FORMAT(a.date_created, '%Y-%m-%d') from trips as a 
         WHERE a._id = ${result.insertId} AND a.status = '${STATUS_ACTIVE}'`);
+
 
     const getAllHeadEmails = await db.query(
         `SELECT a.email FROM users as a WHERE a.status = '${STATUS_ACTIVE}' and a.role ='${USER_ROLE_HEAD}' and a.department = ${data.department_id} `
     );
+
     sendEmail(TRIP_HEAD_EMAIL, getAllHeadEmails[0].email, tripResult[0]);
 
     const affected = result.affectedRows;
@@ -114,39 +119,39 @@ exports.find = async (id) => {
 //     return queryResults ? queryResults : [];
 // };
 
-exports.findAll = async (user) => {
-    console.log(user.role)
+exports.findAll = async (user, query) => {
+
+    const { pageNum, sortOrder } = query.pagination;
+
     if (user.role == USER_ROLE_ADMIN) {
         const queryResults = await db.query(
-            `SELECT a._id, a.type, a.requested_by, b.name as driver_name, c.plate_number, a.date_of_request, a.ticket_status  
-            from trips as a 
-            JOIN driver_details as b ON a.driver = b._id
-            JOIN vehicle_details as c ON a.vehicle = c._id
-            WHERE a.status = '${STATUS_ACTIVE}'`
+            `SELECT *
+            FROM trips AS a 
+            WHERE a.status = '${STATUS_ACTIVE}'
+            ORDER BY a._id ${sortOrder}
+            LIMIT 10 OFFSET ${(pageNum - 1) * 10}`
+
         );
         return queryResults || [];
     } else if (user.role == USER_ROLE_HEAD) {
         const queryResults = await db.query(
-            `SELECT a._id, a.type, a.requested_by, b.name as driver_name, c.plate_number, a.date_of_request, a.ticket_status  
+            `SELECT * 
             from trips as a 
-            JOIN driver_details as b ON a.driver = b._id
-            JOIN vehicle_details as c ON a.vehicle = c._id
-            WHERE a.status = '${STATUS_ACTIVE}' and department = '${user.department}'`
+            WHERE a.status = '${STATUS_ACTIVE}' and department = '${user.department}'
+            ORDER BY a._id ${sortOrder}
+            LIMIT 10 OFFSET ${(pageNum - 1) * 10}`
         );
         return queryResults || [];
     } else {
         const queryResults = await db.query(
-            `SELECT a._id, a.type, a.requested_by, b.name as driver_name, c.plate_number, a.date_of_request, a.ticket_status  
+            `SELECT * 
             from trips as a 
-            JOIN driver_details as b ON a.driver = b._id
-            JOIN vehicle_details as c ON a.vehicle = c._id
-            WHERE a.status = '${STATUS_ACTIVE}' and department = '${user.department}' and created_by = '${user.username}'`
+            WHERE a.status = '${STATUS_ACTIVE}' and a.department = '${user.department}' and a.created_by = '${user.username}'
+            ORDER BY a._id ${sortOrder}
+            LIMIT 10 OFFSET ${(pageNum - 1) * 10}`
         );
         return queryResults || [];
     }
-
-
-
 };
 
 
@@ -206,10 +211,39 @@ exports.delete = async (id) => {
 
 exports.headApproval = async (id, data) => {
 
-    if (data.role != USER_ROLE_HEAD) return false;
+    console.log(data.role)
+    if (data.role != USER_ROLE_HEAD) { return false };
 
     const attributes = {
         ticket_status: TICKET_STATUS_APPROVED,
+        updated_by: data.username,
+        date_updated: new (Date)
+    };
+
+    const update = await db.query(`UPDATE trips SET ? WHERE _id = ${id}`, { ...attributes });
+
+    const getAllHeadEmails = await db.query(
+        `SELECT a.email FROM users as a WHERE a.status = '${STATUS_ACTIVE}' and a.role ='${USER_ROLE_HEAD}' `
+    );
+
+    if (update) {
+        const queryResult = await db.query(`SELECT *, DATE_FORMAT(a.date_created, '%Y-%m-%d') as date_created from trips as a
+        WHERE a._id = ${id} AND a.status = '${STATUS_ACTIVE}'`);
+
+        sendEmail(TRIP_ADMIN_EMAIL, getAllHeadEmails[0].email, queryResult[0]);
+        return queryResult[0] ? queryResult[0] : null;
+    }
+
+    throw new Error('Error on updating trips record!');
+}
+
+exports.adminApproval = async (id, data) => {
+
+    console.log(data.role)
+    if (data.role != USER_ROLE_ADMIN) { return false };
+
+    const attributes = {
+        ticket_status: TICKET_STATUS_ONGOING,
         updated_by: data.username,
         date_updated: new (Date)
     };
@@ -221,15 +255,35 @@ exports.headApproval = async (id, data) => {
     );
 
     if (update) {
-        const queryResult = await db.query(`SELECT *, DATE_FORMAT(a.date_created, '%Y-%m-%d') as date_created from trips as a  JOIN driver_details as b ON a.driver = b._id
-        JOIN vehicle_details as c ON a.vehicle = c._id
+        const queryResult = await db.query(`SELECT *, DATE_FORMAT(a.date_created, '%Y-%m-%d') as date_created from trips as a
         WHERE a._id = ${id} AND a.status = '${STATUS_ACTIVE}'`);
 
-        sendEmail(TRIP_ADMIN_EMAIL, getAllAdminEmails[0].email, queryResult[0]);
+        console.log(queryResult[0])
+        sendApprovedEmail(TRIP_APPROVED_EMAIL, getAllAdminEmails[0].email, queryResult[0]);
         return queryResult[0] ? queryResult[0] : null;
     }
 
     throw new Error('Error on updating trips record!');
+}
+
+exports.complete = async (id, data, user) => {
+
+    if (user.role != USER_ROLE_ADMIN) { return false };
+
+    if (data.ticket_status == TICKET_STATUS_PENDING || data.ticket_status == TICKET_STATUS_APPROVED) {
+        return false
+    };
+
+    const attributes = { ticket_status: TICKET_STATUS_COMPLETE };
+
+    const update = await db.query(`UPDATE trips SET ? WHERE _id = ${id}`, { ...attributes });
+
+    if (update) {
+        const queryResult = await db.query(`SELECT * FROM trips WHERE _id = ${id} AND status = '${STATUS_INACTIVE}'`);
+        return queryResult[0] ? queryResult[0] : null;
+    }
+
+    throw new Error('Error on deleting trips record!');
 }
 
 

@@ -206,9 +206,8 @@ exports.delete = async (req, res) => {
                 message: lang.t('user.err.not_exists')
             });
         }
-        body.updated_by = userAuth.username;
 
-        const deletedProfitCenter = await defaultModel.delete(defaultVariable.id)
+        const deletedProfitCenter = await defaultModel.delete(defaultVariable._id)
 
         res.status(200).send({
             status: 'success',

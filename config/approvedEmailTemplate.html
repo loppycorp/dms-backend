@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Trip Approval Notification</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="font-sans">
+    <h1 class="text-2xl font-bold">Trip Approval Notification</h1>
+    <p class="mt-4">Hi {{data.recipient}},</p>
+    <p class="mt-4">
+      We are pleased to inform you that your trip request has been approved! We
+      understand the importance of this trip for the progress and success of our
+      company, and we appreciate your thorough planning and justification.
+    </p>
+    <p class="mt-4">Here are the details of your approved trip:</p>
+    <h2 class="mt-4">Trip Details:</h2>
+    <ul class="list-disc ml-8">
+      <li><span class="font-bold">Destination:</span> {{data.destination}}</li>
+      <li><span class="font-bold">Dates:</span> {{data.tripDates}}</li>
+    </ul>
+    <h2 class="mt-4">Driver's Detail:</h2>
+    <ul class="list-disc ml-8">
+      <li><span class="font-bold">Name:</span> {{data.driverName}}</li>
+      <li>
+        <span class="font-bold">Vehicle's Plate #:</span>
+        {{data.vehiclePlateNo}}
+      </li>
+      <li>
+        <span class="font-bold">Contact No.:</span> {{data.driverContactNo}}
+      </li>
+    </ul>
+    <p class="mt-4">Please read the reminder for your trip:</p>
+    <ul class="list-disc ml-8">
+      <li>Fill-up Trip Manifesto before vehicles leave company premises.</li>
+      <li>ALWAYS wear a facemask while inside the vehicle.</li>
+      <li>Keep the window open at least 3 inches.</li>
+      <li>Strictly NO EATING inside the vehicle.</li>
+      <li>DO NOT leave any trash inside the vehicle.</li>
+    </ul>
+    <p class="mt-4">Thank you and Regards,</p>
+    <p class="font-bold">Verte Information Technology Division</p>
+  </body>
+</html>

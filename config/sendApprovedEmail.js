@@ -30,24 +30,18 @@ const sendEmail = async (subject, recipient, data) => {
         });
 
         // Read the HTML template file
-        const templatePath = path.join(__dirname, "emailTemplate.html");
+        const templatePath = path.join(__dirname, "approvedEmailTemplate.html");
         const template = fs.readFileSync(templatePath, "utf-8");
 
         // Replace the placeholders in the template with the corresponding data
         const emailContent = template
-            .replace("{{data.requestType}}", data.type)
-            .replace("{{data.requestedBy}}", data.requested_by)
-            .replace("{{data.createdAt}}", data.date_created)
+            .replace("{{data.recipient}}", data.requested_by)
             .replace("{{data.destination}}", data.destination)
-            .replace("{{data.tripType}}", data.trip_type)
-            .replace("{{data.passengerType}}", data.passenger_type)
-            .replace("{{data.priority}}", data.priority)
-            .replace("{{data.driver}}", (data.name) ? data.name : 'NOT YET ASSIGNED')
+            .replace("{{data.tripDates}}", data.trip_type)
+            .replace("{{data.driverName}}", (data.name) ? data.name : 'NOT YET ASSIGNED')
             .replace("{{data.vehiclePlateNo}}", (data.plate_number) ? `${data.plate_number} ${data.model}` : 'NOT YET ASSIGNED')
-            .replace("{{data.contactNo}}", (data.name) ? data.contact_number : 'NOT YET ASSIGNED')
-            .replace("{{data.portalLink}}", data.portalLink)
-            .replace("{{data.senderName}}", data.requested_by)
-            .replace("{{data.senderDivision}}", data.department);
+            .replace("{{data.driverContactNo}}", (data.name) ? data.contact_number : 'NOT YET ASSIGNED')
+
 
         // Define the email options
         const mailOptions = {

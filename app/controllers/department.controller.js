@@ -71,7 +71,7 @@ exports.update = async (req, res) => {
         }
 
         const auth = req.auth;
-        const userAuth = await defaultModel.find(auth._id);
+        const userAuth = await usersAuth.find(auth._id);
         if (!userAuth) {
             return res.status(400).send({
                 status: 'error',
@@ -196,16 +196,15 @@ exports.delete = async (req, res) => {
         }
 
         const auth = req.auth;
-        const userAuth = await defaultModel.find(auth._id);
+        const userAuth = await usersAuth.find(auth._id);
         if (!userAuth) {
             return res.status(400).send({
                 status: 'error',
                 message: lang.t('user.err.not_exists')
             });
         }
-        body.updated_by = userAuth.username;
 
-        const deletedProfitCenter = await defaultModel.delete(driverDetail.id)
+        const deletedProfitCenter = await defaultModel.delete(driverDetail._id)
 
         res.status(200).send({
             status: 'success',

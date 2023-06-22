@@ -17,5 +17,5 @@ module.exports = (app) => {
     app.put(process.env.BASE_URL + '/vehicle-details/:id', auth.validateToken, defaultController.update);
 
     // Delete profit-center record
-    app.delete(process.env.BASE_URL + '/vehicle-details/:id', defaultController.delete);
+    app.delete(process.env.BASE_URL + '/vehicle-details/:id', auth.validateToken, defaultController.delete);
 };
