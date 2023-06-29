@@ -272,6 +272,7 @@ exports.adminApproval = async (id, data, body) => {
 
 exports.complete = async (id, data, user) => {
 
+    console.log(id)
     if (user.role != USER_ROLE_ADMIN) { return false };
 
     if (data.ticket_status == TICKET_STATUS_PENDING || data.ticket_status == TICKET_STATUS_APPROVED) {
@@ -283,7 +284,7 @@ exports.complete = async (id, data, user) => {
     const update = await db.query(`UPDATE trips SET ? WHERE _id = ${id}`, { ...attributes });
 
     if (update) {
-        const queryResult = await db.query(`SELECT * FROM trips WHERE _id = ${id} AND status = '${STATUS_INACTIVE}'`);
+        const queryResult = await db.query(`SELECT * FROM trips WHERE _id = ${id} AND status = '${STATUS_ACTIVE}'`);
         return queryResult[0] ? queryResult[0] : null;
     }
 

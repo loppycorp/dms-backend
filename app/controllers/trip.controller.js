@@ -325,6 +325,7 @@ exports.adminApproved = async (req, res) => {
 
 
         const data = await defaultModel.adminApproval(defaultVariable._id, userAuth, body);
+        console.log(data)
 
         if (!data) {
             return res.status(400).send({
@@ -432,6 +433,7 @@ exports.complete = async (req, res) => {
             });
         }
         const trip = await defaultModel.complete(defaultVariable._id, defaultVariable, userAuth);
+        console.log(trip)
         if (!trip) {
             return res.status(400).send({
                 status: 'error',
