@@ -37,7 +37,7 @@ const sendEmail = async (subject, recipient, data) => {
         const emailContent = template
             .replace("{{data.recipient}}", data.requested_by)
             .replace("{{data.destination}}", data.destination)
-            .replace("{{data.tripDates}}", data.trip_type)
+            .replace("{{data.tripDates}}", `${data.date_of_trip_to} - ${data.date_of_trip_from}`)
             .replace("{{data.driverName}}", (data.name) ? data.name : 'NOT YET ASSIGNED')
             .replace("{{data.vehiclePlateNo}}", (data.plate_number) ? `${data.plate_number} ${data.model}` : 'NOT YET ASSIGNED')
             .replace("{{data.driverContactNo}}", (data.name) ? data.contact_number : 'NOT YET ASSIGNED')

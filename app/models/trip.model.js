@@ -237,12 +237,15 @@ exports.headApproval = async (id, data) => {
     throw new Error('Error on updating trips record!');
 }
 
-exports.adminApproval = async (id, data) => {
+exports.adminApproval = async (id, data, body) => {
 
-    console.log(data.role)
-    if (data.role != USER_ROLE_ADMIN) { return false };
+    // console.log(data.role)
+    // if (data.role != USER_ROLE_ADMIN) { return false };
 
+    console.log(body)
     const attributes = {
+        driver: body.driver,
+        vehicle: body.vehicle,
         ticket_status: TICKET_STATUS_ONGOING,
         updated_by: data.username,
         date_updated: new (Date)
@@ -255,10 +258,11 @@ exports.adminApproval = async (id, data) => {
     );
 
     if (update) {
-        const queryResult = await db.query(`SELECT *, DATE_FORMAT(a.date_created, '%Y-%m-%d') as date_created from trips as a
+        const queryResult = await db.query(`SELECT *, DATE_FORMAT(a.date_created, '%Y-%m-%d') as date_created, 
+        DATE_FORMAT(a.date_of_trip_to, '%Y-%m-%d') as date_of_trip_to, DATE_FORMAT(a.date_of_trip_from, '%Y-%m-%d') as date_of_trip_from from trips as a JOIN driver_details AS b ON a.driver = b._id
+        JOIN vehicle_details AS c ON a.vehicle = c._id
         WHERE a._id = ${id} AND a.status = '${STATUS_ACTIVE}'`);
 
-        console.log(queryResult[0])
         sendApprovedEmail(TRIP_APPROVED_EMAIL, getAllAdminEmails[0].email, queryResult[0]);
         return queryResult[0] ? queryResult[0] : null;
     }

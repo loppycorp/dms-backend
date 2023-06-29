@@ -293,6 +293,7 @@ exports.adminApproved = async (req, res) => {
     try {
         logger.info(req.path);
 
+        const body = req.body;
         const params = req.params;
 
         const validationParams = paramsSchema.validate(params, { abortEarly: false });
@@ -322,7 +323,8 @@ exports.adminApproved = async (req, res) => {
             });
         }
 
-        const data = await defaultModel.adminApproval(defaultVariable._id, userAuth);
+
+        const data = await defaultModel.adminApproval(defaultVariable._id, userAuth, body);
 
         if (!data) {
             return res.status(400).send({
