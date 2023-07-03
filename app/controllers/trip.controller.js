@@ -183,6 +183,7 @@ exports.search = async (req, res) => {
 
         const totalResult = await db.query(`
         SELECT COUNT(*) as total FROM trips WHERE status = '${STATUS_ACTIVE}'`);
+        console.log(totalResult)
 
         const totalPending = await db.query(`
         SELECT COUNT(*) as total FROM trips WHERE status = '${STATUS_ACTIVE}' AND ticket_status = '${defaultModel.TICKET_STATUS_PENDING}'`);

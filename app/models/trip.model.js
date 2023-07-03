@@ -127,6 +127,8 @@ exports.findAll = async (user, query) => {
         const queryResults = await db.query(
             `SELECT *
             FROM trips AS a 
+            LEFT JOIN driver_details AS b ON a.driver = b._id
+LEFT JOIN vehicle_details AS c ON a.vehicle = c._id
             WHERE a.status = '${STATUS_ACTIVE}'
             ORDER BY a._id ${sortOrder}
             LIMIT 10 OFFSET ${(pageNum - 1) * 10}`
@@ -137,6 +139,8 @@ exports.findAll = async (user, query) => {
         const queryResults = await db.query(
             `SELECT * 
             from trips as a 
+            LEFT JOIN driver_details AS b ON a.driver = b._id
+LEFT JOIN vehicle_details AS c ON a.vehicle = c._id
             WHERE a.status = '${STATUS_ACTIVE}' and department = '${user.department}'
             ORDER BY a._id ${sortOrder}
             LIMIT 10 OFFSET ${(pageNum - 1) * 10}`
@@ -146,6 +150,8 @@ exports.findAll = async (user, query) => {
         const queryResults = await db.query(
             `SELECT * 
             from trips as a 
+            LEFT JOIN driver_details AS b ON a.driver = b._id
+LEFT JOIN vehicle_details AS c ON a.vehicle = c._id
             WHERE a.status = '${STATUS_ACTIVE}' and a.department = '${user.department}' and a.created_by = '${user.username}'
             ORDER BY a._id ${sortOrder}
             LIMIT 10 OFFSET ${(pageNum - 1) * 10}`
