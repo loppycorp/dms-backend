@@ -84,7 +84,10 @@ exports.update = async (req, res) => {
             });
         }
 
-        const validationBody = updateSchema.validate(body, { abortEarly: false });
+        console.log(body)
+
+
+        const validationBody = createSchema.validate(body, { abortEarly: false });
         if (validationBody.error) {
             return res.status(400).send({
                 'status': 'error',
@@ -102,7 +105,14 @@ exports.update = async (req, res) => {
                 message: lang.t('user.err.not_exists')
             });
         }
+        body.requested_by = `${userAuth.first_name} ${userAuth.last_name}`;
+        body.department = userAuth.department;
+        body.email = userAuth.email;
+        body.local_number = userAuth.local_number;
+        body.contact_number = userAuth.contact_number;
+        body.created_by = userAuth.username;
         body.updated_by = userAuth.username;
+        body.department_id = userAuth.department_id;
 
         const updateUser = await defaultModel.update(user._id, body);
 

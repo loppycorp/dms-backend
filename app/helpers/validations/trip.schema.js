@@ -19,8 +19,6 @@ const defaultSchema = Joi.object({
         defaultModel.PASSENGER_TYPE_VIP
     ),
     total_of_passengers: Joi.number().required(),
-    destination: Joi.string().trim().required().max(LIMIT_DEFAULT_CHAR),
-    contact_person: Joi.number().required(),
     purpose_of_trip: Joi.string().trim().required().max(LIMIT_DEFAULT_CHAR),
     pick_up_time: Joi.string().regex(/^([01]?\d|2[0-3]) (AM|PM)$/).required(),
     pick_up_location: Joi.string().trim().required().max(LIMIT_DEFAULT_CHAR),
@@ -33,6 +31,13 @@ const defaultSchema = Joi.object({
     ),
     remarks: Joi.string().max(LIMIT_DEFAULT_CHAR).allow(""),
     errands: Joi.string().max(LIMIT_DEFAULT_CHAR).allow(""),
+    items: Joi.array().items(
+        Joi.object({
+            destination: Joi.string().trim().max(LIMIT_DEFAULT_CHAR),
+            contact_person: Joi.number(),
+        })
+    )
+
 
 });
 
